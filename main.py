@@ -6,10 +6,11 @@ frequency = 5000
 
 motor = ADC(Pin(36)) #Configurar el pin 36 como la referencia ADC del motor
 reference = ADC(Pin(39)) #Configurar el pin 39 como la referencia ADC del sensor de referencia
-horario = PWM(Pin(2), frequency) #Configurar el pin 2 como salida PWM
-a_horario = PWM(Pin(4), frequency) #Configurar el pin 4 como salida PWM
+#horario = PWM(Pin(2), frequency) #Configurar el pin 2 como salida PWM
+#a_horario = PWM(Pin(4), frequency) #Configurar el pin 4 como salida PWM
 led = Pin(5, Pin.OUT) #Configurar el pin 5 como salida
-
+led1 = Pin(2, Pin.OUT) #Configurar el pin 2 como salida
+led2 = Pin(4, Pin.OUT) #Configurar el pin 4 como salida
 uart = UART(2, 115200) #Configurar UART en el puerto 2 con una velocidad de 115200 baudios
 
 
@@ -23,13 +24,10 @@ while True:
     if uart.any() > 0: #Si hay datos en el UART
         pwm = float(uart.read()) #Leer el dato
         if pwm > 0: #Si el dato es positivo gira sentido horario
-            horario.duty(abs(1023*pwm/5))
-            a_horario.duty(0)
-            led.value(not led.value())
-        elif pwm < 0: #Si el dato es negativo gira sentido antihorario
-            horario.duty(0)
-            a_horario.duty(abs(1023*pwm/5)) 
-        else:
-            led.value(not led.value()) #Cambiar el estado del pin 3
+            led1.value(not led1.value())
+            led2.value(0)
+        else: #Si el dato es negativo gira sentido antihorario
+            led1.value(0)
+            led2.value(not led2.value())
 
     time.sleep(0.1) #Esperar 0.1 segundos

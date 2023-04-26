@@ -67,7 +67,10 @@ def obtener_centroide(M,R):
 
 def getSerialData(self):
     if self[0].inWaiting() > 0:
-        [M,R] = self[0].readline().strip().decode('utf-8').split(',')
+        try: 
+            [M,R] = self[0].readline().strip().decode('utf-8').split(',')
+        except:
+            [M,R] = [0,0]
         centroid = (round(obtener_centroide(int(M),int(R)),3))
         ser2.write(str(centroid).encode('utf-8'))
         print(centroid)
