@@ -1,20 +1,35 @@
-from machine import Pin, ADC, UART
+from machine import Pin, ADC, UART, PWM
 import time
 
 # Crear instancia de ADC
-motor = ADC(Pin(36))
-reference = ADC(Pin(39))
+frequency = 5000
 
+motor = ADC(Pin(36)) #Configurar el pin 36 como la referencia ADC del motor
+reference = ADC(Pin(39)) #Configurar el pin 39 como la referencia ADC del sensor de referencia
+horario = PWM(Pin(2), frequency) #Configurar el pin 2 como salida PWM
+a_horario = PWM(Pin(4), frequency) #Configurar el pin 4 como salida PWM
+led = Pin(5, Pin.OUT) #Configurar el pin 5 como salida
 
-uart = UART(0, 115200) #Configurar UART en el puerto 0 con una velocidad de 115200 baudios
+uart = UART(2, 115200) #Configurar UART en el puerto 2 con una velocidad de 115200 baudios
+
 
 while True:
-    # Leer el valor del ADC
+    # Leer el valor de los ADC
     valor_motor = motor.read()
     valor_reference = reference.read()
 
-    # Imprimir el valor leído
-    print(str(int(valor_motor/11.4)))
-    print(str(int(valor_reference/11.4)))
-    # Esperar un segundo antes de leer nuevamente
-    time.sleep(0.1)
+    # Imprimir el valor leído para que lo lea la comunicación serial
+    print(int(valor_motor/11.4) ,",", int(valor_reference/11.4))
+    if uart.any() > 0: #Si hay datos en el UART
+        pwm = float(uart.read()) #Leer el dato
+        if pwm > 0: #Si el dato es positivo gira sentido horario
+            horario.duty(abs(1023*pwm/5))
+            a_horario.duty(0)
+            led.value(not led.value())
+        elif pwm < 0: #Si el dato es negativo gira sentido antihorario
+            horario.duty(0)
+            a_horario.duty(abs(1023*pwm/5)) 
+        else:
+            led.value(not led.value()) #Cambiar el estado del pin 3
+
+    time.sleep(0.1) #Esperar 0.1 segundos

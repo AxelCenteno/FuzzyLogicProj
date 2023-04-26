@@ -8,13 +8,22 @@ import skfuzzy as fuzz
 import serial
 import time
 
+
 serialPort = "COM6"
+serialPort2 = "COM8"
 baudRate = 115200
 
 try:
     ser = serial.Serial(serialPort, baudRate)
+    print("Connected to " + str(serialPort))
 except:
     print("Failed to connect on " + str(serialPort))
+
+try:
+    ser2 = serial.Serial(serialPort2, baudRate)
+    print("Connected to " + str(serialPort2))
+except:
+    print("Failed to connect on " + str(serialPort2))
 
 def obtener_centroide(M,R):
     reference = np.arange(0,360,1)
@@ -56,44 +65,20 @@ def obtener_centroide(M,R):
     centroid = fuzz.defuzz(voltage,finalcut,'centroid')
     return centroid
 
-def getSerialData(self, samples, numData, serialConnection, lines):
-    for i in range(numData):
-       value = float(serialConnection.readline().strip())
-       data[i].append(value/4096*3.3)
-       lines[i].set_data(range(Samples),data[i])
+def getSerialData(self):
+    if self[0].inWaiting() > 0:
+        [M,R] = self[0].readline().strip().decode('utf-8').split(',')
+        centroid = (round(obtener_centroide(int(M),int(R)),3))
+        ser2.write(str(centroid).encode('utf-8'))
+        print(centroid)
+    else:
+        print("No data")
 
-Samples = 500
-sampleTime = 10
-numData = 2
-
-xmin = 0
-xmax = Samples
-ymin = 0
-ymax = 360
-lines = []
-data = []
-
-for i in range(numData):
-   data.append(collections.deque([0]*Samples, maxlen=Samples))
-   lines.append(Line2D([],[],color='blue'))
-
-fig = plt.figure()
-ax1 = fig.add_subplot(211, xlim=(xmin, xmax), ylim=(ymin, ymax))
-ax1.set_title('Motor')
-ax1.set_xlabel('Samples')
-ax1.set_ylabel('Grados')
-ax1.grid()
-ax1.add_line(lines[0])
-
-ax2 = fig.add_subplot(212, xlim=(xmin, xmax), ylim=(ymin, ymax))
-ax2.set_title('Referencia')
-ax2.set_xlabel('Samples')
-ax2.set_ylabel('Grados')
-ax2.grid()
-ax2.add_line(lines[1])
-
-anim = animation.FuncAnimation(fig, getSerialData, fargs=(Samples, numData, ser, lines), interval=sampleTime)
-plt.show()
-
+if __name__ == "__main__":
+    while True:
+        getSerialData([ser,ser2])
+        time.sleep(0.1)
+# Cerrar comunicación serial
 ser.close()
-
+ 
+    
