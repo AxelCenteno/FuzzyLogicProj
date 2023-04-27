@@ -73,6 +73,7 @@ def getSerialData(self):
             [M,R] = [0,0]
         centroid = (round(obtener_centroide(int(M),int(R)),3))
         ser2.write(str(centroid).encode('utf-8'))
+        print(M,R)
         print(centroid)
     else:
         print("No data")
@@ -80,7 +81,7 @@ def getSerialData(self):
 if __name__ == "__main__":
     while True:
         getSerialData([ser,ser2])
-        time.sleep(0.1)
+        time.sleep(0.3)
 # Cerrar comunicación serial
 ser.close()
  
