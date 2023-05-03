@@ -6,6 +6,13 @@ frequency = 5000
 
 motor = ADC(Pin(36)) #Configurar el pin 36 como la referencia ADC del motor
 reference = ADC(Pin(39)) #Configurar el pin 39 como la referencia ADC del sensor de referencia
+
+motor.width(ADC.WIDTH_12BIT) # Configure la resolución del ADC (10 bits por defecto)
+motor.atten(ADC.ATTN_11DB) # Configure el rango de voltaje que se va a medir (0-3.3V por defecto)
+
+reference.width(ADC.WIDTH_12BIT) # Configure la resolución del ADC (10 bits por defecto)
+reference.atten(ADC.ATTN_11DB) # Configure el rango de voltaje que se va a medir (0-3.3V por defecto)
+
 horario = PWM(Pin(2), frequency) #Configurar el pin 2 como salida PWM
 a_horario = PWM(Pin(4), frequency) #Configurar el pin 4 como salida PWM
 led = Pin(5, Pin.OUT) #Configurar el pin 5 como salida
@@ -24,10 +31,10 @@ while True:
     if uart.any() > 0: #Si hay datos en el UART
         pwm = float(uart.read()) #Leer el dato
         if pwm > 0: #Si el dato es positivo gira sentido horario
-            horario.duty(int(1023*pwm/5))
+            horario.duty(300 + int(723*(pwm)/6))
             a_horario.duty(0)
         else: #Si el dato es negativo gira sentido antihorario
             horario.duty(0)
-            a_horario.duty(int(-1023*pwm/5))
+            a_horario.duty(300 + int(-723*(pwm)/6))
 
-    time.sleep(0.3) #Esperar 0.1 segundos
+    time.sleep(0.1) #Esperar 0.1 segundos
